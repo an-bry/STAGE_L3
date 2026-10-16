@@ -86,9 +86,43 @@ const NAV_SMART_TICKET: Record<Utilisateur['role'], NavSection[]> = {
 };
 
 const NAV_SECURITRACK: Record<Utilisateur['role'], NavSection[]> = {
-  CLIENT: [],
-  ADMIN: [],
-  TECHNICIEN: [],
+  ADMIN: [
+    {
+      title: 'Pilotage',
+      items: [
+        { label: 'Tableau de bord', path: '/securitrack/admin/dashboard', icon: LayoutDashboard },
+        { label: 'Alertes', path: '/securitrack/admin/alertes', icon: Shield },
+      ],
+    },
+    {
+      title: 'Gestion',
+      items: [
+        { label: 'Utilisateurs', path: '/securitrack/admin/utilisateurs', icon: Users },
+        { label: 'Équipements', path: '/securitrack/admin/equipements', icon: HardDrive },
+        { label: 'Contrats', path: '/securitrack/admin/contrats', icon: FileText },
+        { label: 'Maintenances', path: '/securitrack/admin/maintenances', icon: Wrench },
+        { label: 'Sites', path: '/securitrack/admin/sites', icon: MapPin },
+      ],
+    },
+  ],
+  CLIENT: [
+    {
+      title: 'Mon parc',
+      items: [
+        { label: 'Mes contrats', path: '/securitrack/client/contrats', icon: FileText },
+        { label: 'Mes équipements', path: '/securitrack/client/equipements', icon: HardDrive },
+        { label: 'Mes maintenances', path: '/securitrack/client/maintenances', icon: Wrench },
+        { label: 'Mes sites', path: '/securitrack/client/sites', icon: MapPin },
+      ],
+    },
+  ],
+  TECHNICIEN: [
+    {
+      items: [
+        { label: 'Mes maintenances', path: '/securitrack/technicien/maintenances', icon: Wrench },
+      ],
+    },
+  ],
 };
 
 const ROLE_LABELS: Record<Utilisateur['role'], string> = {

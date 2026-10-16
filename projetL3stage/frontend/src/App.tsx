@@ -28,7 +28,7 @@ import InstallationsAdminPage from './pages/camtrack/admin/InstallationsAdminPag
 import GarantiesAdminPage from './pages/camtrack/admin/GarantiesAdminPage';
 import MesInstallationsPage from './pages/camtrack/technicien/MesInstallationsPage';
 import InstallationDetailPage from './pages/camtrack/technicien/InstallationDetailPage';
-
+import { securitrackRoutes } from './routes/SecuritrackRoutes';
 function RootRedirect() {
   const { user, loading } = useAuth();
   if (loading) return <div className="p-8">Chargement...</div>;
@@ -251,6 +251,7 @@ function App() {
     </RoleRoute>
   }
 />
+{securitrackRoutes}
 
           {/* === FALLBACK === */}
           <Route path="/" element={<RootRedirect />} />

@@ -192,7 +192,10 @@ export interface InstallationAdmin {
   statut: StatutInstallation;
   site_nom: string;
   adresse: string;
+   client: number; 
   client_nom: string;
+    offre_nom: string;                 // ← NOUVEAU
+  duree_engagement_mois: number;
   technicien: number;
   technicien_nom: string | null;
   equipements: Equipement[];

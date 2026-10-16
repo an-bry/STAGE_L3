@@ -187,14 +187,17 @@ class EquipementSerializer(serializers.ModelSerializer):
     site_nom = serializers.CharField(source='installation.site.nom', read_only=True)
     client_nom = serializers.SerializerMethodField()
     nb_maintenances = serializers.SerializerMethodField()
-
+    # lien  vers CAMTRACK
+    demande = serializers.IntegerField(source='installation.site.demande.id', read_only=True)
+    site = serializers.IntegerField(source='installation.site.id', read_only=True)
+    client = serializers.IntegerField(source='installation.site.demande.client.id', read_only=True)
     class Meta:
         model = Equipement
         fields = ['id', 'type_equipement', 'model', 'adresse_ip', 'statut',
                   'date_debut_garantie', 'date_fin_garantie',
                   'garantie_expiree', 'garantie_jours_restants',
-                  'installation', 'installation_statut', 'site_nom',
-                  'client_nom', 'nb_maintenances']
+                  'installation', 'installation_statut', 'site', 'site_nom',
+                  'client', 'client_nom', 'demande', 'nb_maintenances']
 
     def get_client_nom(self, obj):
         c = obj.installation.site.demande.client

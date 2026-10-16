@@ -284,24 +284,6 @@ class EquipementGarantieSerializer(serializers.ModelSerializer):
         ]
 
 
-class InstallationAdminSerializer(serializers.ModelSerializer):
-    """Vue Admin : installation avec site, client, technicien et équipements imbriqués."""
-    site_nom = serializers.CharField(source='site.nom', read_only=True)
-    adresse = serializers.CharField(source='site.adresse', read_only=True)
-    client_nom = serializers.CharField(source='site.demande.client.username', read_only=True)
-    technicien_nom = serializers.SerializerMethodField()
-    equipements = EquipementGarantieSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Installation
-        fields = [
-            'id', 'date_installation', 'statut',
-            'site_nom', 'adresse', 'client_nom',
-            'technicien', 'technicien_nom', 'equipements',
-        ]
-
-    def get_technicien_nom(self, obj):
-        return obj.technicien.username if obj.technicien else None
 class EquipementGarantieSerializer(serializers.ModelSerializer):
     """Vue Admin : équipement avec site/client/technicien pour le suivi de garantie."""
     site_nom = serializers.CharField(source='installation.site.nom', read_only=True)
@@ -318,12 +300,14 @@ class EquipementGarantieSerializer(serializers.ModelSerializer):
             'site_nom', 'client_nom', 'installation',
         ]
 
-
 class InstallationAdminSerializer(serializers.ModelSerializer):
     """Vue Admin : installation avec site, client, technicien et équipements imbriqués."""
     site_nom = serializers.CharField(source='site.nom', read_only=True)
     adresse = serializers.CharField(source='site.adresse', read_only=True)
-    client_nom = serializers.CharField(source='site.demande.client.username', read_only=True)
+    client = serializers.SerializerMethodField()
+    client_nom = serializers.SerializerMethodField()
+    offre_nom = serializers.SerializerMethodField()
+    duree_engagement_mois = serializers.SerializerMethodField()
     technicien_nom = serializers.SerializerMethodField()
     equipements = EquipementGarantieSerializer(many=True, read_only=True)
 
@@ -331,14 +315,38 @@ class InstallationAdminSerializer(serializers.ModelSerializer):
         model = Installation
         fields = [
             'id', 'date_installation', 'statut',
-            'site_nom', 'adresse', 'client_nom',
+            'site_nom', 'adresse',
+            'client', 'client_nom',
+            'offre_nom', 'duree_engagement_mois',
             'technicien', 'technicien_nom', 'equipements',
         ]
 
+    def get_client(self, obj):
+        try:
+            return obj.site.demande.client.id
+        except (AttributeError, Exception):
+            return None
+
+    def get_client_nom(self, obj):
+        try:
+            return obj.site.demande.client.username
+        except (AttributeError, Exception):
+            return None
+
+    def get_offre_nom(self, obj):
+        try:
+            return obj.site.demande.offre.nom
+        except (AttributeError, Exception):
+            return None
+
+    def get_duree_engagement_mois(self, obj):
+        try:
+            return obj.site.demande.offre.duree_engagement_mois
+        except (AttributeError, Exception):
+            return None
+
     def get_technicien_nom(self, obj):
         return obj.technicien.username if obj.technicien else None
-
-
 class FichierInstallationSerializer(serializers.ModelSerializer):
     class Meta:
         model = FichierInstallation

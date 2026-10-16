@@ -4,13 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import AppShell from '../components/layout/AppShell';
 
 interface ModuleCard {
-  id: string;
+  id: 'camtrack' | 'smart-ticket' | 'securitrack';
   label: string;
   description: string;
   icon: typeof Camera;
   color: string;
   bgColor: string;
-  path: string;
   actif: boolean;
 }
 
@@ -23,7 +22,6 @@ const MODULES: ModuleCard[] = [
     icon: Camera,
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
-    path: '/camtrack',
     actif: true,
   },
   {
@@ -34,7 +32,6 @@ const MODULES: ModuleCard[] = [
     icon: Ticket,
     color: 'text-orange-600',
     bgColor: 'bg-orange-50',
-    path: '/smart-ticket',
     actif: true,
   },
   {
@@ -45,12 +42,15 @@ const MODULES: ModuleCard[] = [
     icon: Shield,
     color: 'text-green-600',
     bgColor: 'bg-green-50',
-    path: '/securitrack',
-    actif: false,
+    actif: true, // ✅ ACTIVÉ
   },
 ];
 
-function getDefaultPath(moduleId: string, role: string): string {
+/**
+ * Source unique de vérité pour l'écran d'accueil d'un module selon le rôle.
+ * Même logique que ModuleSwitcher — on garde les deux synchronisés.
+ */
+function getDefaultPath(moduleId: ModuleCard['id'], role: string): string {
   if (moduleId === 'camtrack') {
     if (role === 'CLIENT') return '/camtrack/client/offres';
     if (role === 'ADMIN') return '/camtrack/admin/demandes';
@@ -61,7 +61,10 @@ function getDefaultPath(moduleId: string, role: string): string {
     if (role === 'ADMIN') return '/smart-ticket/admin/tickets';
     return '/smart-ticket/technicien/tickets';
   }
-  return '/dashboard';
+  // SecuriTrack
+  if (role === 'ADMIN') return '/securitrack/admin/dashboard';
+  if (role === 'TECHNICIEN') return '/securitrack/technicien/maintenances';
+  return '/securitrack/client/contrats';
 }
 
 export default function DashboardPage() {

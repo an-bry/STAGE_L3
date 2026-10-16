@@ -36,7 +36,7 @@ const MODULES: ModuleConfig[] = [
     icon: Shield,
     color: 'text-green-400',
     basePath: '/securitrack',
-    actif: false,
+    actif: true, // ✅ ACTIVÉ
   },
 ];
 
@@ -44,7 +44,28 @@ function detecterModuleActif(pathname: string): ModuleId {
   if (pathname.startsWith('/camtrack')) return 'camtrack';
   if (pathname.startsWith('/smart-ticket')) return 'smart-ticket';
   if (pathname.startsWith('/securitrack')) return 'securitrack';
-  return 'smart-ticket'; // défaut
+  return 'smart-ticket';
+}
+
+/**
+ * Retourne le chemin d'accueil d'un module pour un rôle donné.
+ * C'est ici qu'on centralise les redirections : une seule source de vérité.
+ */
+function cheminAccueil(mod: ModuleId, role: string): string {
+  if (mod === 'camtrack') {
+    if (role === 'ADMIN') return '/camtrack/admin/demandes';
+    if (role === 'TECHNICIEN') return '/camtrack/technicien/etudes';
+    return '/camtrack/client/offres';
+  }
+  if (mod === 'smart-ticket') {
+    if (role === 'ADMIN') return '/smart-ticket/admin/tickets';
+    if (role === 'TECHNICIEN') return '/smart-ticket/technicien/tickets';
+    return '/smart-ticket/client/tickets';
+  }
+  // securitrack
+  if (role === 'ADMIN') return '/securitrack/admin/dashboard';
+  if (role === 'TECHNICIEN') return '/securitrack/technicien/maintenances';
+  return '/securitrack/client/contrats';
 }
 
 export default function ModuleSwitcher() {
@@ -67,7 +88,8 @@ export default function ModuleSwitcher() {
 
   const switchTo = (mod: ModuleConfig) => {
     if (!mod.actif) return;
-    navigate(`${mod.basePath}/client/${mod.id === 'camtrack' ? 'offres' : 'tickets'}`);
+    const role = localStorage.getItem('user_role') || 'CLIENT';
+    navigate(cheminAccueil(mod.id, role));
     setOpen(false);
   };
 

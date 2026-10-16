@@ -11,6 +11,8 @@ import Button from '../../../components/ui/Button';
 import EmptyState from '../../../components/ui/EmptyState';
 import Badge from '../../../components/ui/Badge';
 import { useToast } from '../../../context/ToastContext';
+import { FileText } from 'lucide-react';
+import ContratFormModal from '../../../components/securitrack/ContratFormModal';
 
 type TabId = 'toutes' | 'planifiees' | 'en_cours' | 'terminees';
 
@@ -24,6 +26,7 @@ const STATUT_CONFIG: Record<
 };
 
 export default function InstallationsAdminPage() {
+  const [contratInstall, setContratInstall] = useState<InstallationAdmin | null>(null);
   const toast = useToast();
 
   const [installations, setInstallations] = useState<InstallationAdmin[]>([]);
@@ -247,12 +250,22 @@ export default function InstallationsAdminPage() {
                       </div>
                     </div>
 
-                    {/* Badges */}
-                    <div className="flex flex-col items-end gap-2 shrink-0">
-                      <Badge variant={conf.variant} dot>
-                        <StatutIcon size={11} /> {conf.label}
-                      </Badge>
-                    </div>
+                   {/* Badges + Action */}
+<div className="flex flex-col items-end gap-2 shrink-0">
+  <Badge variant={conf.variant} dot>
+    <StatutIcon size={11} /> {conf.label}
+  </Badge>
+
+  {install.statut === 'TERMINEE' && install.equipements.length > 0 && (
+    <Button
+      variant="success"
+      icon={<FileText size={13} />}
+      onClick={() => setContratInstall(install)}
+    >
+      Créer un contrat
+    </Button>
+  )}
+</div>
                   </div>
                 </div>
               );
@@ -260,6 +273,19 @@ export default function InstallationsAdminPage() {
           </div>
         )}
       </div>
+      {contratInstall && (
+  <ContratFormModal
+    open={!!contratInstall}
+    onClose={() => setContratInstall(null)}
+    onSuccess={() => {
+      toast.success('Contrat créé', 'Visible dans SecuriTrack → Contrats.');
+      setContratInstall(null);
+    }}
+    clientInitial={contratInstall.client}
+    equipementsInitiaux={contratInstall.equipements.map(e => e.id)}
+    dureeEngagementMois={contratInstall.duree_engagement_mois}
+  />
+)}
     </AppShell>
   );
 }
