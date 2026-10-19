@@ -306,7 +306,7 @@ class TicketAdminSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = [
             'id', 'date_creation', 'priorite', 'statut', 'description',
-            'client', 'technicien', 'interventions',
+            'client', 'technicien', 'interventions','equipement_ref'
         ] + TICKET_CHAMPS_ENRICHIS + ['priorite_modifiee_manuellement']
         read_only_fields = [
             'id', 'date_creation', 'priorite', 'statut', 'client', 'technicien',
@@ -318,7 +318,16 @@ class TicketAdminSerializer(serializers.ModelSerializer):
             return None
         return int(restant.total_seconds())
 
-
+    def get_equipement_ref(self, obj):
+        if not obj.equipement_ref:
+            return None
+        return {
+            'id': obj.equipement_ref.id,
+            'model': obj.equipement_ref.model,
+            'type_equipement': obj.equipement_ref.type_equipement,
+            'adresse_ip': obj.equipement_ref.adresse_ip,
+            'statut': obj.equipement_ref.statut,
+        }
 class TicketSuiviSerializer(serializers.ModelSerializer):
     """Vue complète d'un ticket pour le Client : ticket + intervention + pièces + rapport"""
     technicien = UtilisateurResumeSerializer(read_only=True)

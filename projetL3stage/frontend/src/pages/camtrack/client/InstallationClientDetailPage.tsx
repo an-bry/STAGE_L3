@@ -146,6 +146,10 @@ export default function InstallationClientDetailPage() {
     installation.statut === 'TERMINEE' && rapport && !rapport.validation_client;
   const dejaValidee = rapport?.validation_client;
 
+  // ── Protections contre undefined ──
+  const equipements = installation.equipements ?? [];
+  const fichiers = installation.fichiers ?? [];
+
   return (
     <AppShell
       title={`INST-${String(installation.id).padStart(5, '0')}`}
@@ -187,7 +191,7 @@ export default function InstallationClientDetailPage() {
           <div className="pt-4 border-t border-line grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-xs text-ink-soft mb-0.5">Équipements</p>
-              <p className="text-ink">{installation.equipements.length} installé(s)</p>
+              <p className="text-ink">{equipements.length} installé(s)</p>
             </div>
             <div>
               <p className="text-xs text-ink-soft mb-0.5">Statut</p>
@@ -261,10 +265,10 @@ export default function InstallationClientDetailPage() {
         {/* Équipements */}
         <div className="bg-card border border-line rounded-lg p-6">
           <h3 className="text-base font-semibold text-ink mb-4 flex items-center gap-2">
-            <HardDrive size={16} /> Équipements installés ({installation.equipements.length})
+            <HardDrive size={16} /> Équipements installés ({equipements.length})
           </h3>
 
-          {installation.equipements.length === 0 ? (
+          {equipements.length === 0 ? (
             <EmptyState
               icon={<HardDrive size={24} />}
               title="Aucun équipement"
@@ -272,7 +276,7 @@ export default function InstallationClientDetailPage() {
             />
           ) : (
             <div className="space-y-3">
-              {installation.equipements.map((eq) => {
+              {equipements.map((eq) => {
                 const jours = eq.garantie_jours_restants;
                 const expiree = eq.garantie_expiree;
 
@@ -327,13 +331,13 @@ export default function InstallationClientDetailPage() {
         </div>
 
         {/* Photos */}
-        {installation.fichiers.length > 0 && (
+        {fichiers.length > 0 && (
           <div className="bg-card border border-line rounded-lg p-6">
             <h3 className="text-base font-semibold text-ink mb-4 flex items-center gap-2">
-              <ImageIcon size={16} /> Photos de l'installation ({installation.fichiers.length})
+              <ImageIcon size={16} /> Photos de l'installation ({fichiers.length})
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {installation.fichiers.map((f) => (
+              {fichiers.map((f) => (
                 <a
                   key={f.id}
                   href={f.fichier}

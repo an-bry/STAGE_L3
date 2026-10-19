@@ -59,7 +59,7 @@ import { useToast } from '../../context/ToastContext';
 import PieceDemandeeSection from '../../components/smart-ticket/PieceDemandeeSection';
 import CommentairesSection from '../../components/smart-ticket/CommentairesSection';
 import { soumettreDiagnostic } from '../../api/ticketService';
-
+import CouvertureEquipement from '../../components/smart-ticket/CouvertureEquipement';
 type TabId = 'overview' | 'diagnostic' | 'pieces_demandees' | 'intervention' | 'pieces' | 'comments';
 
 const ETAPES: Step[] = [
@@ -797,6 +797,7 @@ function OverviewTab({ ticket }: { ticket: TicketTechnicien }) {
         <div className="bg-card border border-line rounded-lg p-6">
           <h3 className="text-sm font-semibold text-ink mb-3">Description</h3>
           <p className="text-sm text-ink-soft whitespace-pre-wrap">{ticket.description}</p>
+          <CouvertureEquipement ticketId={ticket.id} />
         </div>
 
         <div className="bg-card border border-line rounded-lg p-6">

@@ -62,7 +62,15 @@ export interface TicketAdmin extends TicketChampsEnrichis {
   technicien: UtilisateurResume | null;
   priorite_modifiee_manuellement: boolean;
   interventions?: InterventionSuivi[];
+    equipement_ref?: {
+    id: number;
+    model: string;
+    type_equipement: string;
+    adresse_ip: string | null;
+    statut: string;
+  } | null;
 }
+
 
 // === TICKET : Vue Technicien ===
 export interface TicketTechnicien extends TicketChampsEnrichis {

@@ -60,7 +60,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 from reportlab.lib.colors import HexColor
-
+from camtrack.models import Equipement
 
 class TicketCreateView(generics.CreateAPIView):
     serializer_class = TicketCreateSerializer
@@ -359,7 +359,6 @@ class TicketSuiviView(generics.RetrieveAPIView):
             'interventions__technicien',
         )
 
-
 class ValiderInterventionView(APIView):
     """
     Le Client valide l'intervention réalisée sur un de ses tickets.
@@ -392,23 +391,31 @@ class ValiderInterventionView(APIView):
         ancien_statut = ticket.statut
         ticket.statut = 'CLOTURE'
         ticket.save(update_fields=['statut'])
+        
+        # ⬇️⬇️⬇️ LOGIQUE DE REMISE EN SERVICE (CORRIGÉE) ⬇️⬇️⬇️
+        if ticket.equipement_ref and ticket.equipement_ref.statut == 'EN_PANNE':
+            # On vérifie s'il n'y a pas un AUTRE ticket encore ouvert sur cet équipement
+            autres_tickets_ouverts = Ticket.objects.filter(
+                equipement_ref=ticket.equipement_ref
+            ).exclude(statut__in=['RESOLU', 'CLOTURE']).exclude(id=ticket.id).exists()
+
+            if not autres_tickets_ouverts:
+                ticket.equipement_ref.statut = 'ACTIF'
+                ticket.equipement_ref.save()
+        # ⬆️⬆️⬆️ FIN DE LA LOGIQUE ⬆️⬆️⬆️
+
         enregistrer_historique(ticket, 'STATUT', ancien_statut, 'CLOTURE', request.user)
+        
         notifier(
             intervention.technicien,
             f"Le client a validé l'intervention sur le ticket TCK-{str(ticket.id).zfill(5)}, ticket clôturé.",
             f"ticket:{ticket.id}"
         )
-        notifier(
-            intervention.technicien,
-            f"Le client a validé l'intervention sur le ticket TCK-{str(ticket.id).zfill(5)}, ticket clôturé.",
-            f"ticket:{ticket.id}"
-        )
-        _remettre_equipement_en_service(ticket)      # <-- LIGNE AJOUTÉE
+        
         return Response({
             "intervention": InterventionSerializer(intervention).data,
             "ticket": TicketSerializer(ticket).data
         }, status=status.HTTP_200_OK)
-
 
 class TicketHistoriqueView(generics.ListAPIView):
     """

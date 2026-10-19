@@ -48,6 +48,7 @@ import Badge from '../../components/ui/Badge';
 import { useToast } from '../../context/ToastContext';
 import DevisSection from '../../components/smart-ticket/DevisSection';
 import CommentairesSection from '../../components/smart-ticket/CommentairesSection';
+import EquipementLieBloc from '../../components/smart-ticket/EquipementLieBloc';
 
 type TabId = 'overview' | 'devis' | 'activity' | 'comments' | 'intervention' | 'planning';
 
@@ -104,7 +105,6 @@ export default function AdminTicketDetailPage() {
       setPlanification(planifData);
       setNouvellePriorite(ticketData.priorite);
 
-      // ✅ Charge la dernière intervention (diagnostic du technicien)
       const interventions = ticketData.interventions || [];
       const derniereIntervention =
         interventions.length > 0 ? interventions[interventions.length - 1] : null;
@@ -140,41 +140,30 @@ export default function AdminTicketDetailPage() {
 
       const justifLower = (h.justification || '').toLowerCase();
 
-      // Diagnostic
       if (h.champ_modifie === 'STATUT' && justifLower.includes('diagnostic')) {
         title = 'Diagnostic soumis';
         variant = 'success';
         description = h.justification;
-      }
-      // Devis
-      else if (justifLower.includes('devis')) {
+      } else if (justifLower.includes('devis')) {
         title = h.justification;
         variant = 'success';
         description = '';
-      }
-      // Planification
-      else if (h.champ_modifie === 'PLANIFICATION' || justifLower.includes('planifi')) {
+      } else if (h.champ_modifie === 'PLANIFICATION' || justifLower.includes('planifi')) {
         title = 'Planification';
         variant = 'primary';
         description = h.justification;
-      }
-      // Statut
-      else if (h.champ_modifie === 'STATUT') {
+      } else if (h.champ_modifie === 'STATUT') {
         title = 'Changement de statut';
         variant = 'primary';
         description = h.justification
           ? `${h.ancienne_valeur || '∅'} → ${h.nouvelle_valeur} — ${h.justification}`
           : `${h.ancienne_valeur || '∅'} → ${h.nouvelle_valeur}`;
-      }
-      // Priorité
-      else if (h.champ_modifie === 'PRIORITE') {
+      } else if (h.champ_modifie === 'PRIORITE') {
         variant = 'warning';
         description = h.justification
           ? `${h.ancienne_valeur} → ${h.nouvelle_valeur} — ${h.justification}`
           : `${h.ancienne_valeur} → ${h.nouvelle_valeur}`;
-      }
-      // Technicien
-      else if (h.champ_modifie === 'TECHNICIEN') {
+      } else if (h.champ_modifie === 'TECHNICIEN') {
         variant = 'primary';
         description = h.justification
           ? `${h.ancienne_valeur} → ${h.nouvelle_valeur} — ${h.justification}`
@@ -219,7 +208,6 @@ export default function AdminTicketDetailPage() {
     const tech = techniciensCharge.find((t) => t.id === Number(technicienChoisi));
     if (!tech) return;
 
-    // Blocage dur
     if (tech.charge_actuelle >= tech.charge_max) {
       toast.error(
         'Technicien surchargé',
@@ -228,7 +216,6 @@ export default function AdminTicketDetailPage() {
       return;
     }
 
-    // Avertissement
     if (tech.charge_actuelle >= tech.charge_avertissement) {
       setConfirmSurchargeOpen(true);
       return;
@@ -385,7 +372,6 @@ export default function AdminTicketDetailPage() {
       breadcrumb={['NjCam', 'Admin', 'Tickets', formatReference(ticket.id)]}
     >
       <div className="p-6 max-w-6xl mx-auto space-y-5">
-        {/* Bouton retour */}
         <button
           onClick={() => navigate('/smart-ticket/admin/tickets')}
           className="flex items-center gap-2 text-sm text-ink-soft hover:text-ink"
@@ -393,7 +379,6 @@ export default function AdminTicketDetailPage() {
           <ArrowLeft size={16} /> Tous les tickets
         </button>
 
-        {/* En-tête */}
         <div className="bg-card border border-line rounded-lg p-6">
           <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
             <div className="flex-1 min-w-0">
@@ -414,7 +399,6 @@ export default function AdminTicketDetailPage() {
             </div>
           </div>
 
-          {/* Actions rapides */}
           <div className="flex flex-wrap gap-2 pt-4 border-t border-line">
             {ticket.statut === 'NOUVEAU' && (
               <Button
@@ -450,11 +434,9 @@ export default function AdminTicketDetailPage() {
           </div>
         </div>
 
-        {/* Onglets */}
         <Tabs tabs={tabs} active={activeTab} onChange={(id) => setActiveTab(id as TabId)} />
 
-        {/* Contenu des onglets */}
-        {activeTab === 'overview' && <OverviewTab ticket={ticket} />}
+        {activeTab === 'overview' && <OverviewTab ticket={ticket} onUpdate={charger} />}
 
         {activeTab === 'activity' && (
           <div className="bg-card border border-line rounded-lg p-6">
@@ -492,7 +474,6 @@ export default function AdminTicketDetailPage() {
         )}
       </div>
 
-      {/* === Modale Affecter === */}
       <Modal
         open={affecterOpen}
         onClose={() => setAffecterOpen(false)}
@@ -583,7 +564,6 @@ export default function AdminTicketDetailPage() {
         </div>
       </Modal>
 
-      {/* === Confirm surcharge === */}
       <ConfirmDialog
         open={confirmSurchargeOpen}
         onClose={() => setConfirmSurchargeOpen(false)}
@@ -600,7 +580,6 @@ export default function AdminTicketDetailPage() {
         loading={affectationEnCours}
       />
 
-      {/* === Modale Priorité === */}
       <Modal
         open={prioriteOpen}
         onClose={() => setPrioriteOpen(false)}
@@ -647,7 +626,6 @@ export default function AdminTicketDetailPage() {
         </form>
       </Modal>
 
-      {/* === Modale Planification === */}
       <Modal
         open={planifOpen}
         onClose={() => setPlanifOpen(false)}
@@ -695,7 +673,6 @@ export default function AdminTicketDetailPage() {
         </form>
       </Modal>
 
-      {/* === Confirm Annuler Planif === */}
       <ConfirmDialog
         open={confirmAnnulerPlanif}
         onClose={() => setConfirmAnnulerPlanif(false)}
@@ -713,9 +690,11 @@ export default function AdminTicketDetailPage() {
 // SOUS-COMPOSANTS
 // ============================================
 
-function OverviewTab({ ticket }: { ticket: TicketAdmin }) {
+function OverviewTab({ ticket, onUpdate }: { ticket: TicketAdmin; onUpdate: () => void }) { 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      
+      {/* Colonne de gauche */}
       <div className="lg:col-span-2 space-y-4">
         <div className="bg-card border border-line rounded-lg p-6">
           <h3 className="text-sm font-semibold text-ink mb-3">Description</h3>
@@ -738,8 +717,19 @@ function OverviewTab({ ticket }: { ticket: TicketAdmin }) {
             />
           </dl>
         </div>
+
+        {/* 🔥 LE BLOC EST ICI MAINTENANT 🔥 */}
+        <EquipementLieBloc
+          ticketId={ticket.id}
+          equipementRef={ticket.equipement_ref}
+          equipementTexteLibre={ticket.equipement}
+          clientId={ticket.client.id}
+          onUpdate={onUpdate}
+        />
+
       </div>
 
+      {/* Colonne de droite */}
       <div className="space-y-4">
         <div className="bg-card border border-line rounded-lg p-6">
           <h3 className="text-sm font-semibold text-ink mb-3">Demandeur</h3>
@@ -828,7 +818,6 @@ function InterventionTab({
         </Button>
       </div>
 
-      {/* Diagnostic initial */}
       <div>
         <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-1">
           Diagnostic
@@ -836,7 +825,6 @@ function InterventionTab({
         <p className="text-sm text-ink whitespace-pre-wrap">{intervention.diagnostic}</p>
       </div>
 
-      {/* Symptômes */}
       {intervention.symptomes_constates && (
         <div>
           <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-1">
@@ -848,7 +836,6 @@ function InterventionTab({
         </div>
       )}
 
-      {/* Tests */}
       {intervention.tests_effectues && (
         <div>
           <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-1">
@@ -860,7 +847,6 @@ function InterventionTab({
         </div>
       )}
 
-      {/* Résultat */}
       {intervention.resultat_intervention && (
         <div>
           <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-1">
@@ -872,7 +858,6 @@ function InterventionTab({
         </div>
       )}
 
-      {/* Pièces demandées */}
       {intervention.pieces_demandees && intervention.pieces_demandees.length > 0 && (
         <div>
           <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-2 flex items-center gap-2">
@@ -897,7 +882,6 @@ function InterventionTab({
         </div>
       )}
 
-      {/* Pièces utilisées */}
       {intervention.pieces_utilisees && intervention.pieces_utilisees.length > 0 && (
         <div>
           <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-2">
