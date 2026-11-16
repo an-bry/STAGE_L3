@@ -35,13 +35,12 @@ class DemandeInstallation(models.Model):
         related_name='demandes_installation',
         limit_choices_to={'role': 'CLIENT'},
     )
-    # NOUVEAU : offre choisie (null=True seulement pour les anciennes lignes ;
-    # obligatoire côté API)
+   
     offre = models.ForeignKey(
         Offre, on_delete=models.PROTECT,
         null=True, blank=True, related_name='demandes',
     )
-    # NOUVEAU : description du besoin saisie par le client
+
     description = models.TextField(blank=True, default='')
 
     class Meta:

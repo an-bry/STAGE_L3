@@ -30,9 +30,6 @@ import PriorityBadge from '../../components/ui/PriorityBadge';
 
 import { useToast } from '../../context/ToastContext';
 
-// ============================================
-// CONSTANTES
-// ============================================
 const CATEGORIES = [
   'Panne matérielle',
   'Panne logicielle',
@@ -57,13 +54,11 @@ const ETAPES: Step[] = [
   { id: 'verif', label: 'Vérification' },
 ];
 
-// Statuts considérés comme "en cours" (non archivés)
 const STATUTS_ACTIFS: TicketStatut[] = [
   'BROUILLON', 'NOUVEAU', 'A_QUALIFIER', 'AFFECTE',
   'PLANIFIE', 'EN_ATTENTE', 'EN_COURS',
 ];
 
-// Statuts archivés
 const STATUTS_ARCHIVES: TicketStatut[] = ['RESOLU', 'CLOTURE'];
 
 type TabId = 'en_cours' | 'archives';
@@ -77,12 +72,10 @@ export default function ClientTicketsPage() {
   const [recherche, setRecherche] = useState('');
   const [activeTab, setActiveTab] = useState<TabId>('en_cours');
 
-  // Modal création
   const [modalOpen, setModalOpen] = useState(false);
   const [etape, setEtape] = useState(0);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
 
-  // Formulaire
   const [description, setDescription] = useState('');
   const [categorie, setCategorie] = useState('');
   const [equipement, setEquipement] = useState('');
@@ -94,7 +87,6 @@ export default function ClientTicketsPage() {
   const [disponibilites, setDisponibilites] = useState('');
   const [erreurs, setErreurs] = useState<Record<string, string>>({});
 
-  // === Chargement ===
   const chargerTickets = () => {
     setLoading(true);
     getMesTickets()
@@ -105,10 +97,8 @@ export default function ClientTicketsPage() {
 
   useEffect(() => {
     chargerTickets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // === Séparation actifs / archivés ===
   const enCours = useMemo(
     () => tickets.filter((t) => STATUTS_ACTIFS.includes(t.statut)),
     [tickets]
@@ -118,7 +108,6 @@ export default function ClientTicketsPage() {
     [tickets]
   );
 
-  // === Filtrage + tri ===
   const ticketsAffiches = useMemo(() => {
     const base = activeTab === 'en_cours' ? enCours : archives;
     let filtered = [...base].sort((a, b) => b.id - a.id);
@@ -136,7 +125,6 @@ export default function ClientTicketsPage() {
     return filtered;
   }, [activeTab, enCours, archives, recherche]);
 
-  // === Stats ===
   const stats = useMemo(
     () => ({
       total: tickets.length,
@@ -146,7 +134,6 @@ export default function ClientTicketsPage() {
     [tickets, enCours, archives]
   );
 
-  // === Estimation priorité ===
   const estimationPriorite = useMemo(() => {
     const len = description.trim().length;
     if (len < 10) return null;
@@ -166,7 +153,6 @@ export default function ClientTicketsPage() {
     return { label: 'Faible', variant: 'neutral' as const, sla: '7 jours' };
   }, [description, niveauImpact]);
 
-  // === Validation ===
   const validerEtape = (etapeIndex: number): boolean => {
     const e: Record<string, string> = {};
 
@@ -198,7 +184,6 @@ export default function ClientTicketsPage() {
     setEtape((s) => Math.max(s - 1, 0));
   };
 
-  // === Création ===
   const handleCreerTicket = async (e: FormEvent) => {
     e.preventDefault();
     if (!validerEtape(0) || !validerEtape(2)) return;
@@ -249,7 +234,6 @@ export default function ClientTicketsPage() {
     resetForm();
   };
 
-  // === Onglets ===
   const tabs: TabItem[] = [
     { id: 'en_cours', label: 'En cours', icon: <ListFilter size={14} />, badge: enCours.length },
     { id: 'archives', label: 'Archivés', icon: <Archive size={14} />, badge: archives.length },
@@ -266,17 +250,30 @@ export default function ClientTicketsPage() {
       }
     >
       <div className="p-6 space-y-6 max-w-5xl mx-auto">
-        {/* Stats */}
+        
+        {/* 🟢 BOUTON PRINCIPAL DANS LA PAGE (Sécurité anti-bug) 🟢 */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-semibold text-ink">Gestion des tickets</h2>
+            <p className="text-sm text-ink-soft">Créez et suivez l'état de vos demandes d'intervention.</p>
+          </div>
+          <Button 
+            icon={<Plus size={16} />} 
+            onClick={() => setModalOpen(true)}
+            className="shrink-0 shadow-sm"
+          >
+            Créer un ticket
+          </Button>
+        </div>
+
         <div className="grid grid-cols-3 gap-4">
           <StatCard label="Total" value={stats.total} icon={<FileText size={18} />} accent="primary" />
           <StatCard label="En cours" value={stats.enCours} icon={<Clock size={18} />} accent="warning" />
           <StatCard label="Archivés" value={stats.archives} icon={<CheckCircle2 size={18} />} accent="success" />
         </div>
 
-        {/* Onglets */}
         <Tabs tabs={tabs} active={activeTab} onChange={(id) => setActiveTab(id as TabId)} />
 
-        {/* Recherche */}
         {tickets.length > 0 && (
           <Input
             placeholder="Rechercher dans mes tickets…"
@@ -286,7 +283,6 @@ export default function ClientTicketsPage() {
           />
         )}
 
-        {/* Liste */}
         {loading ? (
           <div className="bg-card border border-line rounded-lg p-12 text-center text-sm text-ink-soft">
             Chargement de vos tickets…
@@ -378,7 +374,6 @@ export default function ClientTicketsPage() {
         )}
       </div>
 
-      {/* Modal Création */}
       <Modal
         open={modalOpen}
         onClose={fermerModal}
@@ -422,7 +417,6 @@ export default function ClientTicketsPage() {
         </div>
 
         <form id="form-ticket" onSubmit={handleCreerTicket}>
-          {/* ÉTAPE 0 */}
           {etape === 0 && (
             <div className="space-y-5">
               <div className="flex items-start gap-2 p-3 bg-info-soft rounded-md text-info text-xs">
@@ -473,7 +467,6 @@ export default function ClientTicketsPage() {
             </div>
           )}
 
-          {/* ÉTAPE 1 */}
           {etape === 1 && (
             <div className="space-y-5">
               <Input
@@ -499,7 +492,6 @@ export default function ClientTicketsPage() {
             </div>
           )}
 
-          {/* ÉTAPE 2 */}
           {etape === 2 && (
             <div className="space-y-5">
               <div>
@@ -552,7 +544,6 @@ export default function ClientTicketsPage() {
             </div>
           )}
 
-          {/* ÉTAPE 3 */}
           {etape === 3 && (
             <div className="space-y-5">
               <div className="bg-surface rounded-md p-3 flex items-start gap-2">
@@ -581,9 +572,6 @@ export default function ClientTicketsPage() {
   );
 }
 
-// ============================================
-// SOUS-COMPOSANTS
-// ============================================
 function StatCard({ label, value, icon, accent }: { label: string; value: number; icon: React.ReactNode; accent: 'primary' | 'warning' | 'success' }) {
   const accents = {
     primary: 'bg-primary-soft text-primary',

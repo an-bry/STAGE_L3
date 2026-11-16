@@ -1,6 +1,6 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
-  Ticket, Wrench, LogOut, LayoutDashboard, BarChart3, Users,
+  Ticket, Wrench, LogOut, LayoutDashboard, Users,
   Camera, FileText, ClipboardList, Package,
   MapPin, Shield,
   HardDrive,
@@ -27,14 +27,14 @@ interface NavSection {
 // ============================================
 const NAV_CAMTRACK: Record<Utilisateur['role'], NavSection[]> = {
   CLIENT: [
-  {
-    items: [
-      { label: 'Catalogue', path: '/camtrack/client/offres', icon: Camera },
-      { label: 'Mes demandes', path: '/camtrack/client/demandes', icon: FileText },
-      { label: 'Mes installations', path: '/camtrack/client/installations', icon: HardDrive },
-    ],
-  },
-],
+    {
+      items: [
+        { label: 'Catalogue', path: '/camtrack/client/offres', icon: Camera },
+        { label: 'Mes demandes', path: '/camtrack/client/demandes', icon: FileText },
+        { label: 'Mes installations', path: '/camtrack/client/installations', icon: HardDrive },
+      ],
+    },
+  ],
   ADMIN: [
     {
       title: 'Gestion',
@@ -68,15 +68,9 @@ const NAV_SMART_TICKET: Record<Utilisateur['role'], NavSection[]> = {
       title: 'Gestion',
       items: [
         { label: 'Tickets', path: '/smart-ticket/admin/tickets', icon: Ticket },
-        { label: 'Priorisation', path: '/smart-ticket/admin/priorisation', icon: BarChart3 },
       ],
     },
-    {
-      title: 'Configuration',
-      items: [
-        { label: 'Équipe', path: '/smart-ticket/admin/equipe', icon: Users },
-      ],
-    },
+   
   ],
   TECHNICIEN: [
     {
@@ -177,13 +171,13 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Sélecteur de module */}
-      <div className="px-3 py-3 border-b border-white/10">
+      {/* Sélecteur de module - CIBLE DU TOUR */}
+      <div id="tour-sidebar-modules" className="px-3 py-3 border-b border-white/10">
         <ModuleSwitcher />
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
+      {/* Navigation - CIBLE DU TOUR */}
+      <nav id="tour-sidebar-nav" className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
         {sections.map((section, idx) => (
           <div key={idx}>
             {section.title && (
@@ -221,12 +215,15 @@ export default function Sidebar() {
       {/* Footer */}
       <div className="px-3 py-3 border-t border-white/10 space-y-1">
         <RoleSwitcher />
-        <div className="px-3 py-2">
+        
+        {/* Profil utilisateur - CIBLE DU TOUR (Optionnel, on utilisera plutôt celui de la topbar) */}
+        <div id="tour-sidebar-profile" className="px-3 py-2">
           <p className="text-sm font-medium truncate text-white">
             {user.first_name} {user.last_name}
           </p>
           <p className="text-xs text-white/40">{ROLE_LABELS[user.role]}</p>
         </div>
+        
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-white/60 hover:bg-white/5 hover:text-white transition-colors"
